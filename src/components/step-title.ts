@@ -3,10 +3,8 @@ import { STEP } from "../core/steps";
 
 export default function StepTitle(parent: Element, steps: Steps) {
   const title = document.createElement("h2");
-  title.textContent = "Focus Timer";
-
-  steps.onChange((step) => {
-    switch (step) {
+  const updateTitle = () => {
+    switch (steps.current) {
       case STEP.FOCUS:
         title.textContent = "Focus Timer";
         break;
@@ -17,7 +15,10 @@ export default function StepTitle(parent: Element, steps: Steps) {
         title.textContent = "Long Break Timer";
         break;
     }
-  });
+  };
+
+  updateTitle();
+  steps.onChange(updateTitle);
 
   parent.appendChild(title);
   return title;

@@ -1,12 +1,13 @@
 import "./style.css";
 
-import StartPauseButton from "./components/start-pause-button";
+import PlayButtons from "./components/play-buttons";
 import Container from "./components/container";
-import Counter from "./components/counter";
+import TimerCounter from "./components/timer-counter";
 import Timer from "./core/timer";
 import StepButtons from "./components/step-buttons";
 import StepTitle from "./components/step-title";
 import Steps from "./core/steps";
+import StepCounter from "./components/step-counter";
 
 const steps = new Steps();
 const timer = new Timer(steps.duration);
@@ -14,14 +15,14 @@ const timer = new Timer(steps.duration);
 steps.onChange(() => {
   timer.setTime(steps.duration);
 });
+timer.onComplete(() => {
+  steps.complete();
+});
 
 const containerEl = Container(document.querySelector("#app")!);
 
+StepButtons(containerEl, timer, steps);
+TimerCounter(containerEl, timer);
+PlayButtons(containerEl, timer, steps);
+StepCounter(containerEl, steps);
 StepTitle(containerEl, steps);
-Counter(containerEl, timer);
-
-const navEl = document.createElement("div");
-containerEl.appendChild(navEl);
-
-StepButtons(navEl, timer, steps);
-StartPauseButton(navEl, timer);

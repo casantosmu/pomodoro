@@ -22,7 +22,9 @@ export default function StepButtons(
   timer: Timer,
   steps: Steps
 ) {
-  return buttons.map(({ text, step }) => {
+  const nav = document.createElement("nav");
+
+  for (const { text, step } of buttons) {
     const btn = document.createElement("button");
     btn.textContent = text;
     btn.addEventListener("click", () => {
@@ -36,7 +38,9 @@ export default function StepButtons(
       btn.disabled = false;
     });
 
-    parent.appendChild(btn);
-    return btn;
-  });
+    nav.appendChild(btn);
+  }
+
+  parent.appendChild(nav);
+  return nav;
 }

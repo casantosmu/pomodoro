@@ -1,6 +1,6 @@
 import type Timer from "../core/timer";
 
-export default function Counter(parent: Element, timer: Timer) {
+export default function TimerCounter(parent: Element, timer: Timer) {
   const counter = document.createElement("span");
   const updateCounter = () => {
     const min = Math.floor(timer.remainingMs / 60000);

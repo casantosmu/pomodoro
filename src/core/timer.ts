@@ -5,6 +5,7 @@ export default class Timer {
   #setTimeObservers: (() => void)[] = [];
   #startObservers: (() => void)[] = [];
   #pauseObservers: (() => void)[] = [];
+  #completeObservers: (() => void)[] = [];
 
   constructor(timeMs: number) {
     this.#remainingMs = timeMs;
@@ -19,10 +20,12 @@ export default class Timer {
 
   setTime(timeMs: number) {
     this.#remainingMs = timeMs;
+    this.#startMs = undefined;
 
-    for (const callback of this.#setTimeObservers) {
-      callback();
-    }
+    clearTimeout(this.#timeoutId);
+
+    this.#notify(this.#pauseObservers);
+    this.#notify(this.#setTimeObservers);
   }
 
   start() {
@@ -33,13 +36,16 @@ export default class Timer {
 
     this.#startMs = Date.now();
 
-    this.#timeoutId = setTimeout(() => {
-      this.pause();
-    }, this.#remainingMs);
+    const handleComplete = () => {
+      this.#remainingMs = 0;
+      this.#startMs = undefined;
 
-    for (const callback of this.#startObservers) {
-      callback();
-    }
+      this.#notify(this.#pauseObservers);
+      this.#notify(this.#completeObservers);
+    };
+
+    this.#timeoutId = setTimeout(handleComplete, this.#remainingMs);
+    this.#notify(this.#startObservers);
   }
 
   pause() {
@@ -52,10 +58,7 @@ export default class Timer {
     this.#startMs = undefined;
 
     clearTimeout(this.#timeoutId);
-
-    for (const callback of this.#pauseObservers) {
-      callback();
-    }
+    this.#notify(this.#pauseObservers);
   }
 
   toggle() {
@@ -76,5 +79,15 @@ export default class Timer {
 
   onPause(callback: () => void) {
     this.#pauseObservers.push(callback);
+  }
+
+  onComplete(callback: () => void) {
+    this.#completeObservers.push(callback);
+  }
+
+  #notify(observers: (() => void)[]) {
+    for (const callback of observers) {
+      callback();
+    }
   }
 }

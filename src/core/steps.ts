@@ -8,7 +8,12 @@ type Step = (typeof STEP)[keyof typeof STEP];
 
 export default class Steps {
   #currentStep: Step = STEP.FOCUS;
-  #observers: ((step: Step) => void)[] = [];
+  #pomodorosCount = 1;
+  #observers: (() => void)[] = [];
+
+  get current() {
+    return this.#currentStep;
+  }
 
   get duration() {
     switch (this.#currentStep) {
@@ -21,15 +26,41 @@ export default class Steps {
     }
   }
 
-  set(step: Step) {
-    this.#currentStep = step;
-
-    for (const callback of this.#observers) {
-      callback(this.#currentStep);
-    }
+  get pomodoros() {
+    return this.#pomodorosCount;
   }
 
-  onChange(callback: (step: Step) => void) {
+  set(step: Step) {
+    this.#currentStep = step;
+    this.#notifyObservers();
+  }
+
+  complete() {
+    switch (this.#currentStep) {
+      case STEP.FOCUS:
+        if (this.#pomodorosCount % 4 !== 0) {
+          this.#currentStep = STEP.SHORT_BREAK;
+        } else {
+          this.#currentStep = STEP.LONG_BREAK;
+        }
+        break;
+      case STEP.SHORT_BREAK:
+      case STEP.LONG_BREAK:
+        this.#currentStep = STEP.FOCUS;
+        this.#pomodorosCount++;
+        break;
+    }
+
+    this.#notifyObservers();
+  }
+
+  onChange(callback: () => void) {
     this.#observers.push(callback);
+  }
+
+  #notifyObservers() {
+    for (const callback of this.#observers) {
+      callback();
+    }
   }
 }
